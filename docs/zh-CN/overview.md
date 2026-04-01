@@ -1,6 +1,6 @@
 ﻿# 00 — Claude Code 完整架构解析
 
-> 🌐 **语言**: 中文 | [English →](../00-overview.md)
+> 🌐 **语言**: 中文 | [English →](../overview)
 > 📖 **[在线阅读 →](https://openedclaude.github.io/claude-reviews-claude/zh-CN/overview)** — 支持侧边栏导航、暗色模式与全文搜索，体验更佳。
 
 
@@ -70,22 +70,22 @@ Claude Code 的强大不是来自某个杀手锏功能，而是**六大支柱协
 
 | 篇 | 标题 | 电梯演讲 | 行数 |
 |----|------|----------|------|
-| 01 | [QueryEngine：大脑](../01-query-engine.md) | 将 LLM 变成 Agent 的 `while(true)` 循环——12 步流水线、AsyncGenerator 流式处理、错误恢复 | 711 |
-| 02 | [工具系统：42 模块统一接口](../02-tool-system.md) | 每个工具 30+ 方法契约，Schema 驱动注册，三层过滤，流式并行执行 | 665 |
-| 03 | [多 Agent 协调器](../03-coordinator.md) | tmux/iTerm2/进程内后端，AsyncLocalStorage 隔离，自动环境检测 | 342 |
-| 04 | [Plugin 系统：全生命周期](../04-plugin-system.md) | Plugin = Skills + Hooks + MCP 服务器；6 种 Skill 来源，后台安装协调 | 548 |
-| 05 | [Hook 系统：20 种事件类型](../05-hook-system.md) | PreToolUse / PostToolUse / Notification 钩子，MCP 传输，否决与变异语义 | 299 |
-| 06 | [Bash 引擎：沙箱与管道](../06-bash-engine.md) | 6 层纵深防御，tree-sitter AST 解析，macOS Seatbelt 沙箱 | 458 |
-| 07 | [权限管道：从规则到内核](../07-permission-pipeline.md) | 7 种规则来源，Bash AST 安全，投机性 YOLO 分类器，OAuth 2.0 PKCE | 619 |
-| 08 | [Agent 集群：团队协调](../08-agent-swarms.md) | 7 种 TaskState 变体，SendMessage 协议，DreamTask 记忆整理，UltraPlan | 503 |
-| 09 | [会话持久化](../09-session-persistence.md) | JSONL 追加存储，恢复/分叉/搜索，跨会话记忆 | 411 |
-| 10 | [上下文组装](../10-context-assembly.md) | System Prompt 分层，Token 预算分配，动态附件，斜杠命令 | 473 |
-| 11 | [压缩系统](../11-compact-system.md) | 4 层压缩（微 → 截断 → 自动 → 紧急），电路断路器，Prompt Cache 共享 | 372 |
-| 12 | [启动与引导](../12-startup-bootstrap.md) | Import-Gap 并行，快速路径分发，记忆化初始化，`state.ts` 叶模块模式 | 393 |
-| 13 | [桥接系统](../13-bridge-system.md) | CLI ↔ IDE WebSocket 桥接，3 种 Spawn 模式，Chrome 扩展集成 | 346 |
-| 14 | [UI 与状态管理](../14-ui-state-management.md) | Fork Ink + React 19，终端中的 W3C 事件模型，35 行 Store，Vim 状态机 | 980 |
-| 15 | [服务层与 API](../15-services-api-layer.md) | queryModel() 700 行核心，多提供商工厂，SSE 流管道，重试引擎 | 691 |
-| 16 | [基础设施与配置](../16-infrastructure-config.md) | Bootstrap 单例，5 层设置合并，安全存储，CLAUDE.md 记忆系统 | 876 |
+| 01 | [QueryEngine：大脑](./chapters/01-query-engine) | 将 LLM 变成 Agent 的 `while(true)` 循环——12 步流水线、AsyncGenerator 流式处理、错误恢复 | 711 |
+| 02 | [工具系统：42 模块统一接口](./chapters/02-tool-system) | 每个工具 30+ 方法契约，Schema 驱动注册，三层过滤，流式并行执行 | 665 |
+| 03 | [多 Agent 协调器](./chapters/03-coordinator) | tmux/iTerm2/进程内后端，AsyncLocalStorage 隔离，自动环境检测 | 342 |
+| 04 | [Plugin 系统：全生命周期](./chapters/04-plugin-system) | Plugin = Skills + Hooks + MCP 服务器；6 种 Skill 来源，后台安装协调 | 548 |
+| 05 | [Hook 系统：20 种事件类型](./chapters/05-hook-system) | PreToolUse / PostToolUse / Notification 钩子，MCP 传输，否决与变异语义 | 299 |
+| 06 | [Bash 引擎：沙箱与管道](./chapters/06-bash-engine) | 6 层纵深防御，tree-sitter AST 解析，macOS Seatbelt 沙箱 | 458 |
+| 07 | [权限管道：从规则到内核](./chapters/07-permission-pipeline) | 7 种规则来源，Bash AST 安全，投机性 YOLO 分类器，OAuth 2.0 PKCE | 619 |
+| 08 | [Agent 集群：团队协调](./chapters/08-agent-swarms) | 7 种 TaskState 变体，SendMessage 协议，DreamTask 记忆整理，UltraPlan | 503 |
+| 09 | [会话持久化](./chapters/09-session-persistence) | JSONL 追加存储，恢复/分叉/搜索，跨会话记忆 | 411 |
+| 10 | [上下文组装](./chapters/10-context-assembly) | System Prompt 分层，Token 预算分配，动态附件，斜杠命令 | 473 |
+| 11 | [压缩系统](./chapters/11-compact-system) | 4 层压缩（微 → 截断 → 自动 → 紧急），电路断路器，Prompt Cache 共享 | 372 |
+| 12 | [启动与引导](./chapters/12-startup-bootstrap) | Import-Gap 并行，快速路径分发，记忆化初始化，`state.ts` 叶模块模式 | 393 |
+| 13 | [桥接系统](./chapters/13-bridge-system) | CLI ↔ IDE WebSocket 桥接，3 种 Spawn 模式，Chrome 扩展集成 | 346 |
+| 14 | [UI 与状态管理](./chapters/14-ui-state-management) | Fork Ink + React 19，终端中的 W3C 事件模型，35 行 Store，Vim 状态机 | 980 |
+| 15 | [服务层与 API](./chapters/15-services-api-layer) | queryModel() 700 行核心，多提供商工厂，SSE 流管道，重试引擎 | 691 |
+| 16 | [基础设施与配置](./chapters/16-infrastructure-config) | Bootstrap 单例，5 层设置合并，安全存储，CLAUDE.md 记忆系统 | 876 |
 
 > **合计**：16 篇深度解析 + 本总纲，共 8,600+ 行架构分析。
 
