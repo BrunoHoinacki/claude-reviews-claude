@@ -101,37 +101,7 @@ export function getAllBaseTools(): Tools {
 
 Many tools only appear when specific build flags are enabled:
 
-```mermaid
-graph TD
-    ALL["getAllBaseTools()"] --> ALWAYS["Always Available"]
-    ALL --> GATED["Feature-Gated"]
-    ALL --> ENV["Environment-Gated"]
-
-    ALWAYS --> A1["BashTool"]
-    ALWAYS --> A2["FileReadTool"]
-    ALWAYS --> A3["FileEditTool"]
-    ALWAYS --> A4["FileWriteTool"]
-    ALWAYS --> A5["AgentTool"]
-    ALWAYS --> A6["WebFetchTool"]
-    ALWAYS --> A7["WebSearchTool"]
-
-    GATED --> G1["PROACTIVE → SleepTool"]
-    GATED --> G2["AGENT_TRIGGERS → CronCreate/Delete/List"]
-    GATED --> G3["MONITOR_TOOL → MonitorTool"]
-    GATED --> G4["KAIROS → SendUserFileTool, PushNotificationTool"]
-    GATED --> G5["COORDINATOR_MODE → coordinatorMode"]
-    GATED --> G6["HISTORY_SNIP → SnipTool"]
-    GATED --> G7["WEB_BROWSER_TOOL → WebBrowserTool"]
-    GATED --> G8["WORKFLOW_SCRIPTS → WorkflowTool"]
-
-    ENV --> E1["USER_TYPE=ant → REPLTool, ConfigTool, TungstenTool"]
-    ENV --> E2["ENABLE_LSP_TOOL → LSPTool"]
-    ENV --> E3["NODE_ENV=test → TestingPermissionTool"]
-
-    style ALWAYS fill:#27AE60,stroke:#333,color:#fff
-    style GATED fill:#E67E22,stroke:#333,color:#fff
-    style ENV fill:#8E44AD,stroke:#333,color:#fff
-```
+![02 tool system 1](assets/02-tool-system-1.svg)
 
 The conditional loading pattern uses `bun:bundle` for compile-time elimination:
 
@@ -222,18 +192,9 @@ The 42+ tools fall into 6 functional categories:
 
 Tools don't go from registry to LLM directly. They pass through a multi-stage filtering pipeline:
 
-```mermaid
-graph LR
-    A["getAllBaseTools()<br/>42+ raw tools"] --> B["filterToolsByDenyRules()<br/>Remove denied tools"]
-    B --> C["isEnabled() check<br/>Runtime enable/disable"]
-    C --> D["Mode filtering<br/>Simple / REPL / Coordinator"]
-    D --> E["assembleToolPool()<br/>Merge with MCP tools"]
-    E --> F["Sort for cache stability<br/>Built-in prefix + MCP suffix"]
-    F --> G["Final tool set<br/>Sent to API"]
-
-    style A fill:#E74C3C,stroke:#333,color:#fff
-    style G fill:#27AE60,stroke:#333,color:#fff
-```
+<p align="center">
+  <img src="assets/02-tool-system-2.svg" width="240">
+</p>
 
 ### Stage 1: Deny Rules
 
@@ -413,18 +374,9 @@ Tools are filtered **before being sent to the model** — not just at call time.
 
 ### How Deferred Tools Work
 
-```mermaid
-graph LR
-    REG["getAllBaseTools()\n42+ tools"] --> SPLIT{"shouldDefer?"}
-    SPLIT -->|No| FULL["Full Schema\nSent to API"]
-    SPLIT -->|Yes| DEF["Deferred\nName only, no schema"]
-    DEF --> TS["Model calls\nToolSearchTool"]
-    TS --> DISC["Discover + Load\nFull schema available"]
-    DISC --> USE["Model calls\nthe real tool"]
-
-    style FULL fill:#27AE60,stroke:#333,color:#fff
-    style DEF fill:#E67E22,stroke:#333,color:#fff
-```
+<p align="center">
+  <img src="assets/02-tool-system-3.svg" width="360">
+</p>
 
 | Field | Purpose |
 |-------|---------|

@@ -8,44 +8,7 @@
 
 ## Architecture Overview
 
-```mermaid
-graph TB
-    subgraph Leader["👑 Team Leader"]
-        TC["TeamCreate<br/>Create team + config.json"]
-        SPAWN["spawnMultiAgent<br/>Spawn teammates"]
-        SEND["SendMessage<br/>DM / broadcast / shutdown"]
-        INBOX_POLL["useInboxPoller<br/>Poll for messages"]
-    end
-
-    subgraph Backend["🖥️ Backends"]
-        TMUX["TmuxBackend<br/>split-pane / separate-window"]
-        ITERM["ITermBackend<br/>native iTerm2 panes (it2 CLI)"]
-        INPROC["InProcessBackend<br/>same process, separate query loop"]
-    end
-
-    subgraph FS["📁 File System (~/.claude/teams/)"]
-        CONFIG["config.json<br/>Team manifest"]
-        MBOX["inboxes/{name}.json<br/>Mailbox (locked)"]
-        TASKS["tasks/{team}/"]
-    end
-
-    subgraph Workers["🔧 Teammates"]
-        W1["teammate-1<br/>researcher"]
-        W2["teammate-2<br/>test-runner"]
-        W3["teammate-3<br/>implementer"]
-    end
-
-    TC --> CONFIG
-    SPAWN --> Backend
-    TMUX --> W1
-    ITERM --> W2
-    INPROC --> W3
-    SEND --> MBOX
-    W1 --> MBOX
-    W2 --> MBOX
-    W3 --> MBOX
-    INBOX_POLL --> MBOX
-```
+![08 agent swarms 1](assets/08-agent-swarms-1.svg)
 
 ---
 
@@ -157,22 +120,9 @@ Multiple Claude instances in a swarm can write concurrently — the lockfile ser
 
 Three backends determine how teammates physically run:
 
-```mermaid
-flowchart TD
-    START["Detect Backend"] --> INSIDE_TMUX{"Inside<br/>tmux?"}
-    INSIDE_TMUX -->|Yes| TMUX_BACKEND["TmuxBackend<br/>(split-pane)"]
-    INSIDE_TMUX -->|No| IN_ITERM{"Inside<br/>iTerm2?"}
-
-    IN_ITERM -->|Yes| IT2_CHECK{"it2 CLI<br/>available?"}
-    IT2_CHECK -->|Yes| ITERM_BACKEND["ITermBackend<br/>(native panes)"]
-    IT2_CHECK -->|No| PREFER_TMUX{"User prefers<br/>tmux?"}
-    PREFER_TMUX -->|Yes| TMUX_AVAIL{"tmux<br/>available?"}
-    PREFER_TMUX -->|No| IT2_SETUP["Show It2SetupPrompt"]
-
-    IN_ITERM -->|No| TMUX_AVAIL
-    TMUX_AVAIL -->|Yes| TMUX_EXTERNAL["TmuxBackend<br/>(external session)"]
-    TMUX_AVAIL -->|No| IN_PROCESS["InProcessBackend<br/>(same process)"]
-```
+<p align="center">
+  <img src="assets/08-agent-swarms-2.svg" width="340">
+</p>
 
 ### Backend Comparison
 

@@ -6,47 +6,9 @@
 
 ## Architecture Overview
 
-```mermaid
-graph TD
-    subgraph "System Prompt (Cached)"
-        SP["getSystemPrompt()<br/>prompts.ts"] --> INTRO["Identity + Rules"]
-        SP --> TOOLS_SEC["Using Your Tools"]
-        SP --> STYLE["Tone & Style"]
-        SP --> BOUNDARY["── DYNAMIC BOUNDARY ──"]
-        SP --> MEMORY["CLAUDE.md Memory"]
-        SP --> ENV["Environment Info"]
-        SP --> LANG["Language Preference"]
-        SP --> MCP_I["MCP Instructions"]
-    end
-
-    subgraph "User Context (Memoized)"
-        UC["getUserContext()<br/>context.ts"] --> CMD["getClaudeMds()"]
-        CMD --> WALK["Directory Walk<br/>CWD → Root"]
-        CMD --> RULES["Rules Processing<br/>.claude/rules/*.md"]
-    end
-
-    subgraph "System Context (Memoized)"
-        SC["getSystemContext()<br/>context.ts"] --> GIT["getGitStatus()"]
-        GIT --> BRANCH["Branch + Status + Log"]
-    end
-
-    subgraph "Per-Turn Attachments"
-        ATT["getAttachments()<br/>attachments.ts"] --> FILES["@mentioned Files"]
-        ATT --> IDE["IDE Selections"]
-        ATT --> NESTED["Nested Memory"]
-        ATT --> DIAG["Diagnostics"]
-        ATT --> HOOKS["Hook Responses"]
-        ATT --> TASKS["Task/Plan Reminders"]
-        ATT --> SKILLS["Skill Discovery"]
-        ATT --> MAIL["Teammate Mailbox"]
-    end
-
-    SP --> QE["QueryEngine.ask()"]
-    UC --> QE
-    SC --> QE
-    ATT --> QE
-    QE --> API["Anthropic API Call"]
-```
+<p align="center">
+  <img src="assets/10-context-assembly.svg" width="550">
+</p>
 
 ---
 

@@ -8,44 +8,7 @@
 
 ## 架构概览
 
-```mermaid
-graph TB
-    subgraph Leader["👑 团队领导"]
-        TC["TeamCreate<br/>创建团队 + config.json"]
-        SPAWN["spawnMultiAgent<br/>生成队友"]
-        SEND["SendMessage<br/>私信 / 广播 / 关闭"]
-        INBOX_POLL["useInboxPoller<br/>轮询消息"]
-    end
-
-    subgraph Backend["🖥️ 后端"]
-        TMUX["TmuxBackend<br/>分屏 / 独立窗口"]
-        ITERM["ITermBackend<br/>原生 iTerm2 窗格"]
-        INPROC["InProcessBackend<br/>同进程，独立查询循环"]
-    end
-
-    subgraph FS["📁 文件系统 (~/.claude/teams/)"]
-        CONFIG["config.json<br/>团队清单"]
-        MBOX["inboxes/{name}.json<br/>邮箱（加锁）"]
-        TASKS["tasks/{team}/"]
-    end
-
-    subgraph Workers["🔧 队友"]
-        W1["teammate-1<br/>researcher"]
-        W2["teammate-2<br/>test-runner"]
-        W3["teammate-3<br/>implementer"]
-    end
-
-    TC --> CONFIG
-    SPAWN --> Backend
-    TMUX --> W1
-    ITERM --> W2
-    INPROC --> W3
-    SEND --> MBOX
-    W1 --> MBOX
-    W2 --> MBOX
-    W3 --> MBOX
-    INBOX_POLL --> MBOX
-```
+![08 agent swarms 1](../assets/08-agent-swarms-1.svg)
 
 ---
 
@@ -114,6 +77,10 @@ graph TB
 ## 3. 后端检测与执行
 
 三种后端决定队友的物理运行方式：
+
+<p align="center">
+  <img src="../assets/08-agent-swarms-2.svg" width="340">
+</p>
 
 | 特性 | Tmux | iTerm2 | 进程内 |
 |------|------|--------|--------|

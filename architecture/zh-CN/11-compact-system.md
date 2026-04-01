@@ -6,36 +6,9 @@
 
 ## 架构概览
 
-```mermaid
-graph TD
-    subgraph "第一层：微压缩（每轮，精准手术）"
-        MC["microcompactMessages()"] --> TB["时间触发微压缩<br/>冷缓存：直接清除内容"]
-        MC --> CMC["缓存微压缩<br/>热缓存：cache_edits API"]
-    end
-
-    subgraph "第二层：会话记忆压缩（轻量级）"
-        SMC["trySessionMemoryCompaction()"] --> SM_CHECK["有会话记忆？"]
-        SM_CHECK -->|有| SM_KEEP["保留近期消息<br/>最少 10K tokens / 5 条文本消息"]
-        SM_CHECK -->|无| FALLBACK["回退到传统方式"]
-    end
-
-    subgraph "第三层：完整压缩（LLM 驱动）"
-        FC["compactConversation()"] --> HOOKS_PRE["PreCompact 钩子"]
-        HOOKS_PRE --> STREAM["流式生成摘要<br/>通过分叉 agent"]
-        STREAM --> RESTORE["恢复文件 + 计划 + 技能"]
-        RESTORE --> HOOKS_POST["PostCompact 钩子<br/>+ SessionStart 钩子"]
-    end
-
-    subgraph "触发逻辑"
-        AUTO["autoCompactIfNeeded()"] --> THRESHOLD["tokens > effective - 13K？"]
-        THRESHOLD -->|是| SMC
-        SMC -->|null| FC
-        MANUAL["/compact 命令"] --> FC
-        REACTIVE["API 413 响应"] --> FC
-    end
-
-    AUTO --> |熔断器| CB["最多 3 次连续失败"]
-```
+<p align="center">
+  <img src="../assets/11-compact-system.svg" width="720">
+</p>
 
 ---
 

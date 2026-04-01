@@ -12,40 +12,7 @@ Claude Code has a full plugin ecosystem hidden under the hood — with a marketp
 
 ## 1. Plugin Architecture at a Glance
 
-```mermaid
-graph TB
-    subgraph Sources["Plugin Sources"]
-        MKT["🏪 Official Marketplace<br/>(GCS bucket)"]
-        GIT["📦 Git Repository<br/>(npm-style install)"]
-        LOCAL["📁 Local Directory<br/>(.claude-plugin/)"]
-        PROJECT["📁 Project Plugins<br/>(.claude/ in repo)"]
-    end
-
-    subgraph Lifecycle["Plugin Lifecycle"]
-        INSTALL["Install<br/>pluginInstallationHelpers.ts"]
-        VALIDATE["Validate<br/>validatePlugin.ts (29K)"]
-        LOAD["Load<br/>pluginLoader.ts (113K)"]
-        REGISTER["Register Components"]
-    end
-
-    subgraph Components["What Plugins Can Provide"]
-        AGENTS["🤖 Agents"]
-        COMMANDS["📋 Commands"]
-        HOOKS["🪝 Hooks"]
-        SKILLS["📚 Skills"]
-        MCP["🔌 MCP Servers"]
-        STYLES["🎨 Output Styles"]
-    end
-
-    Sources --> INSTALL
-    INSTALL --> VALIDATE
-    VALIDATE --> LOAD
-    LOAD --> REGISTER
-    REGISTER --> AGENTS & COMMANDS & HOOKS & SKILLS & MCP & STYLES
-
-    style MKT fill:#4A90D9,stroke:#333,color:#fff
-    style LOAD fill:#E67E22,stroke:#333,color:#fff
-```
+![04 plugin system 1](assets/04-plugin-system-1.svg)
 
 ---
 
@@ -106,15 +73,9 @@ Plugins are discovered from multiple locations:
 
 ### 4.2 Installation
 
-```mermaid
-graph LR
-    URI["Plugin URI<br/>(git URL, marketplace ID,<br/>local path)"] --> PARSE["parseMarketplaceInput()"]
-    PARSE --> RESOLVE["dependencyResolver.ts<br/>Resolve dependencies"]
-    RESOLVE --> CLONE["Git clone /<br/>Zip download"]
-    CLONE --> VALIDATE["validatePlugin()<br/>29K lines of checks"]
-    VALIDATE --> REGISTER["Register in<br/>installedPlugins.json"]
-    REGISTER --> LOAD["pluginLoader.ts<br/>Load components"]
-```
+<p align="center">
+  <img src="assets/04-plugin-system-2.svg" width="240">
+</p>
 
 ### 4.3 Validation
 

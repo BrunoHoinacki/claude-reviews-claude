@@ -12,37 +12,7 @@ Claude Code 在底层隐藏了一个完整的插件生态系统 —— 包括插
 
 ## 1. 插件架构概览
 
-```mermaid
-graph TB
-    subgraph Sources["插件来源"]
-        MKT["🏪 官方市场<br/>(GCS 存储桶)"]
-        GIT["📦 Git 仓库<br/>(类似 npm 安装)"]
-        LOCAL["📁 本地目录<br/>(.claude-plugin/)"]
-        PROJECT["📁 项目插件<br/>(仓库中的 .claude/)"]
-    end
-
-    subgraph Lifecycle["插件生命周期"]
-        INSTALL["安装<br/>pluginInstallationHelpers.ts"]
-        VALIDATE["校验<br/>validatePlugin.ts (29K)"]
-        LOAD["加载<br/>pluginLoader.ts (113K)"]
-        REGISTER["注册组件"]
-    end
-
-    subgraph Components["插件能提供什么"]
-        AGENTS["🤖 智能体"]
-        COMMANDS["📋 命令"]
-        HOOKS["🪝 钩子"]
-        SKILLS["📚 技能"]
-        MCP["🔌 MCP 服务器"]
-        STYLES["🎨 输出样式"]
-    end
-
-    Sources --> INSTALL
-    INSTALL --> VALIDATE
-    VALIDATE --> LOAD
-    LOAD --> REGISTER
-    REGISTER --> AGENTS & COMMANDS & HOOKS & SKILLS & MCP & STYLES
-```
+![04 plugin system 1](../assets/04-plugin-system-1.svg)
 
 ---
 
@@ -98,6 +68,10 @@ graph TB
 4. **市场插件** —— 官方的 GCS 存储桶目录。
 
 ### 4.2 安装
+
+<p align="center">
+  <img src="../assets/04-plugin-system-2.svg" width="240">
+</p>
 
 从解析市场输入到解析依赖，再到克隆/下载 ZIP，最终落库到 `installedPlugins.json`，形成了一条严密的安装链路。
 

@@ -1,4 +1,4 @@
-# Episode 12: Startup & Bootstrap — From `claude` to First Prompt
+﻿# Episode 12: Startup & Bootstrap — From `claude` to First Prompt
 
 > **Source files**: `cli.tsx` (303 lines), `init.ts` (341 lines), `setup.ts` (478 lines), `main.tsx` (4,500+ lines), `bootstrap/state.ts` (1,759 lines), `startupProfiler.ts` (195 lines), `apiPreconnect.ts` (72 lines)
 >
@@ -6,47 +6,7 @@
 
 ## Architecture Overview
 
-```mermaid
-graph LR
-    subgraph "Phase 0: CLI Entry (cli.tsx)"
-        CLI["process.argv"] --> VER{"--version?"}
-        VER -->|Yes| PRINT["Print & exit<br/>Zero imports"]
-        VER -->|No| FAST{"Fast-path?<br/>--daemon-worker<br/>remote-control<br/>ps/logs/attach<br/>--bg<br/>new/list/reply"}
-        FAST -->|Yes| FP["Minimal import path<br/>Skip full CLI"]
-        FAST -->|No| MAIN["Dynamic import main.tsx"]
-    end
-
-    subgraph "Phase 1: Module Eval (main.tsx)"
-        MAIN --> IMPORTS["200+ static imports<br/>profileCheckpoint: main_tsx_imports_loaded"]
-        IMPORTS --> SETTINGS["eagerLoadSettings()<br/>Read settings.json, apply env vars"]
-    end
-
-    subgraph "Phase 2: Init (init.ts)"
-        SETTINGS --> CONFIGS["enableConfigs()"]
-        CONFIGS --> TLS["CA certs + mTLS + proxy"]
-        TLS --> PRECONN["preconnectAnthropicApi()<br/>Fire-and-forget HEAD request"]
-        TLS --> OTEL["Lazy: OpenTelemetry (~400KB)"]
-        TLS --> OAUTH["populateOAuthAccountInfoIfNeeded()"]
-        TLS --> JETBRAINS["initJetBrainsDetection()"]
-        TLS --> REPO["detectCurrentRepository()"]
-    end
-
-    subgraph "Phase 3: Setup (setup.ts)"
-        CONFIGS --> HOOKS["captureHooksConfigSnapshot()"]
-        HOOKS --> WORKTREE{"--worktree?"}
-        WORKTREE -->|Yes| WT["createWorktreeForSession()"]
-        WORKTREE -->|No| BG["Background jobs"]
-        BG --> SM["initSessionMemory()"]
-        BG --> CMDS["void getCommands() // prefetch"]
-        BG --> PLUGINS["loadPluginHooks() // prefetch"]
-        BG --> ATTR["registerAttributionHooks() // setImmediate"]
-    end
-
-    subgraph "Phase 4: Action Handler (main.tsx)"
-        BG --> MCP["connectMcpServers()"]
-        MCP --> RENDER["Ink render REPL"]
-    end
-```
+![12 startup bootstrap](assets/12-startup-bootstrap.svg)
 
 ---
 

@@ -14,27 +14,9 @@ QueryEngine is the central orchestrator of Claude Code's entire lifecycle. It ow
 
 The engine is split into two layers with distinct lifetimes:
 
-```mermaid
-graph TB
-    subgraph Session["QueryEngine — per conversation"]
-        MSG["mutableMessages[]<br/>Full conversation history"]
-        USAGE["totalUsage<br/>Cumulative token accounting"]
-        CACHE["readFileState<br/>File content cache"]
-        ABORT["abortController<br/>Interrupt signal"]
-        DENY["permissionDenials[]<br/>SDK reporting"]
-    end
-
-    subgraph Turn["query() — per user message"]
-        LOOP["while(true) loop"]
-        STREAM["callModel()<br/>Streaming API call"]
-        TOOLS["runTools()<br/>Tool execution"]
-        COMPACT["autocompact<br/>Context compression"]
-        BUDGET["Budget checks<br/>USD + turns + tokens"]
-    end
-
-    Session -->|"submitMessage()"| Turn
-    Turn -->|"yield SDKMessage"| Session
-```
+<p align="center">
+  <img src="assets/01-query-engine-1.svg" width="600">
+</p>
 
 | Layer | Lifetime | Responsibility |
 |-------|----------|----------------|
@@ -65,41 +47,7 @@ export class QueryEngine {
 
 Each call to `submitMessage()` follows a precise sequence:
 
-```mermaid
-sequenceDiagram
-    participant User
-    participant QE as QueryEngine
-    participant PUI as processUserInput()
-    participant SYS as System Prompt Assembly
-    participant Q as query() loop
-    participant API as Anthropic API
-    participant Tools as Tool Execution
-
-    User->>QE: submitMessage(prompt)
-    QE->>PUI: Process slash commands, attachments
-    PUI-->>QE: {messages, shouldQuery, allowedTools}
-    QE->>QE: Push user messages to history
-    QE->>QE: Record transcript (persistence)
-
-    alt shouldQuery == false
-        QE-->>User: Local command result
-    else shouldQuery == true
-        QE->>SYS: Assemble system prompt + context
-        QE->>Q: Start query loop
-        loop while(true)
-            Q->>API: Send messages + tools
-            API-->>Q: Stream response
-            alt Response contains tool_use
-                Q->>Tools: Execute tools
-                Tools-->>Q: Tool results
-                Q->>Q: Push results, continue loop
-            else Response is text only
-                Q-->>QE: Final response
-            end
-        end
-        QE-->>User: Result message (success/error)
-    end
-```
+![01 query engine 2](assets/01-query-engine-2.svg)
 
 ### Phase 1: Input Processing
 
@@ -202,18 +150,9 @@ while (true) {
 
 Before each API call, messages pass through a multi-stage compression pipeline:
 
-```mermaid
-graph LR
-    RAW["Raw messages"] --> BUDGET["Tool result budget<br/>applyToolResultBudget()"]
-    BUDGET --> SNIP["History snip<br/>(HISTORY_SNIP flag)"]
-    SNIP --> MC["Microcompact<br/>Cached MC editing"]
-    MC --> CC["Context collapse<br/>(CONTEXT_COLLAPSE flag)"]
-    CC --> AC["Autocompact<br/>Full summarization"]
-    AC --> API["→ API call"]
-
-    style RAW fill:#E74C3C,stroke:#333,color:#fff
-    style API fill:#27AE60,stroke:#333,color:#fff
-```
+<p align="center">
+  <img src="assets/01-query-engine-3.svg" width="280">
+</p>
 
 | Stage | Purpose | Feature Gate |
 |-------|---------|-------------|

@@ -1,4 +1,4 @@
-> 🌐 **Language**: English | [中文版 →](zh-CN/05-hook-system.md)
+﻿> 🌐 **Language**: English | [中文版 →](zh-CN/05-hook-system.md)
 
 # Hook System: 20 Event Types, Full Lifecycle Interception
 
@@ -12,58 +12,7 @@ Claude Code has a 20-event hook system that lets users and plugins intercept nea
 
 ## 1. The 20 Hook Events
 
-```mermaid
-graph TB
-    subgraph Session["Session Lifecycle"]
-        SS["SessionStart"]
-        SE["SessionEnd"]
-        SETUP["Setup"]
-    end
-
-    subgraph Tools["Tool Execution"]
-        PRE["PreToolUse ⭐"]
-        POST["PostToolUse"]
-        POSTF["PostToolUseFailure"]
-    end
-
-    subgraph Permissions["Permission System"]
-        PD["PermissionDenied"]
-        PR["PermissionRequest"]
-    end
-
-    subgraph Agent["Agent Lifecycle"]
-        AS["SubagentStart"]
-        AST["SubagentStop"]
-        TI["TeammateIdle"]
-    end
-
-    subgraph Context["Context Events"]
-        UPS["UserPromptSubmit"]
-        CC["ConfigChange"]
-        CWD["CwdChanged"]
-        FC["FileChanged"]
-        IL["InstructionsLoaded"]
-    end
-
-    subgraph Tasks["Task Events"]
-        TC["TaskCreated"]
-        TCO["TaskCompleted"]
-    end
-
-    subgraph Output["Output Events"]
-        SL["StatusLine"]
-        FS["FileSuggestion"]
-        STOP["Stop"]
-        SF["StopFailure"]
-    end
-
-    subgraph Elicitation["Elicitation"]
-        EL["Elicitation"]
-        ELR["ElicitationResult"]
-    end
-
-    style PRE fill:#E74C3C,stroke:#333,color:#fff
-```
+![05 hook system 1](assets/05-hook-system-1.svg)
 
 ### Most Important Hook: PreToolUse
 
@@ -102,29 +51,7 @@ Hooks can be implemented in three ways:
 
 ### Execution Flow
 
-```mermaid
-sequenceDiagram
-    participant CC as Claude Code
-    participant HE as Hook Engine
-    participant Hook as Hook (shell/http/agent)
-
-    CC->>HE: Tool use requested
-    HE->>HE: Match hooks by event + tool name
-    HE->>Hook: JSON input via stdin/POST/prompt
-
-    alt Hook returns JSON
-        Hook-->>HE: { permissionDecision, updatedInput, ... }
-        HE->>HE: Aggregate results from all matching hooks
-        HE-->>CC: AggregatedHookResult
-    else Hook returns plain text
-        Hook-->>HE: "some output text"
-        HE->>HE: Treat as informational message
-        HE-->>CC: Message attachment
-    else Hook exits with code 2
-        Hook-->>HE: exit code 2 + stderr
-        HE-->>CC: Blocking error — halt tool
-    end
-```
+![05 hook system 2](assets/05-hook-system-2.svg)
 
 ### Exit Code Convention
 

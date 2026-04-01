@@ -1,4 +1,4 @@
-# 第十二集：启动与引导 —— 从 `claude` 命令到第一个提示符
+﻿# 第十二集：启动与引导 —— 从 `claude` 命令到第一个提示符
 
 > **源文件**：`cli.tsx`（303 行）、`init.ts`（341 行）、`setup.ts`（478 行）、`main.tsx`（4,500+ 行）、`bootstrap/state.ts`（1,759 行）、`startupProfiler.ts`（195 行）、`apiPreconnect.ts`（72 行）
 >
@@ -6,42 +6,7 @@
 
 ## 架构概览
 
-```mermaid
-graph LR
-    subgraph "阶段 0：CLI 入口 (cli.tsx)"
-        CLI["process.argv"] --> VER{"--version?"}
-        VER -->|是| PRINT["打印并退出<br/>零导入"]
-        VER -->|否| FAST{"快速路径？<br/>--daemon-worker<br/>remote-control<br/>ps/logs/attach<br/>--bg<br/>new/list/reply"}
-        FAST -->|是| FP["最小导入路径<br/>跳过完整 CLI"]
-        FAST -->|否| MAIN["动态导入 main.tsx"]
-    end
-
-    subgraph "阶段 1：模块求值 (main.tsx)"
-        MAIN --> IMPORTS["200+ 静态导入<br/>检查点：main_tsx_imports_loaded"]
-        IMPORTS --> SETTINGS["eagerLoadSettings()<br/>读取 settings.json、应用环境变量"]
-    end
-
-    subgraph "阶段 2：初始化 (init.ts)"
-        SETTINGS --> CONFIGS["enableConfigs()"]
-        CONFIGS --> TLS["CA 证书 + mTLS + 代理"]
-        TLS --> PRECONN["preconnectAnthropicApi()<br/>发射即忘 HEAD 请求"]
-        TLS --> OTEL["延迟加载：OpenTelemetry (~400KB)"]
-        TLS --> OAUTH["populateOAuthAccountInfoIfNeeded()"]
-    end
-
-    subgraph "阶段 3：环境设置 (setup.ts)"
-        CONFIGS --> HOOKS["captureHooksConfigSnapshot()"]
-        HOOKS --> BG["后台任务"]
-        BG --> SM["initSessionMemory()"]
-        BG --> CMDS["void getCommands() // 预取"]
-        BG --> PLUGINS["loadPluginHooks() // 预取"]
-    end
-
-    subgraph "阶段 4：动作处理 (main.tsx)"
-        BG --> MCP["connectMcpServers()"]
-        MCP --> RENDER["Ink 渲染 REPL"]
-    end
-```
+![12 startup bootstrap](../assets/12-startup-bootstrap.svg)
 
 ---
 

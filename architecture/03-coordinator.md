@@ -63,26 +63,7 @@ This means Claude Code can dynamically switch modes mid-process to match a resum
 
 ## 2. Architecture: Coordinator vs. Workers
 
-```mermaid
-graph TB
-    USER["👤 User"] -->|"Natural language"| COORD["🧠 Coordinator<br/>(orchestrator mode)"]
-
-    COORD -->|"AgentTool"| W1["🔧 Worker 1<br/>Research"]
-    COORD -->|"AgentTool"| W2["🔧 Worker 2<br/>Implementation"]
-    COORD -->|"AgentTool"| W3["🔧 Worker 3<br/>Verification"]
-
-    W1 -->|"task-notification"| COORD
-    W2 -->|"task-notification"| COORD
-    W3 -->|"task-notification"| COORD
-
-    COORD -->|"SendMessageTool"| W1
-    COORD -->|"TaskStopTool"| W2
-
-    style COORD fill:#4A90D9,stroke:#333,color:#fff
-    style W1 fill:#7B68EE,stroke:#333,color:#fff
-    style W2 fill:#7B68EE,stroke:#333,color:#fff
-    style W3 fill:#7B68EE,stroke:#333,color:#fff
-```
+![03 coordinator 1](assets/03-coordinator-1.svg)
 
 ### Key Principle: Complete Context Isolation
 
@@ -199,14 +180,9 @@ SendMessage({ to: "agent-x7q", message: "Stop the JWT refactor..." })
 
 The system prompt defines a 4-phase workflow:
 
-```mermaid
-graph LR
-    R["📖 Research<br/>(parallel workers)"] --> S["🧠 Synthesis<br/>(coordinator)"]
-    S --> I["🔨 Implementation<br/>(workers)"]
-    I --> V["✅ Verification<br/>(fresh workers)"]
-
-    style S fill:#4A90D9,stroke:#333,color:#fff
-```
+<p align="center">
+  <img src="assets/03-coordinator-2.svg" width="220">
+</p>
 
 ### Phase 1: Research (Parallel)
 

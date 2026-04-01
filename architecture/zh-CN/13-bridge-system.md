@@ -6,31 +6,9 @@
 
 ## 架构概览
 
-```mermaid
-graph TB
-    subgraph "claude.ai / Web UI"
-        USER["用户输入提示词"] --> SERVER["Anthropic 后端"]
-    end
-
-    subgraph "本地机器 (claude remote-control)"
-        POLL["pollForWork()"] -->|"工作项"| SPAWN["sessionRunner.spawn()"]
-        SPAWN --> CHILD["子进程 claude --print\n--sdk-url --session-id\n--input-format stream-json"]
-
-        subgraph "传输层"
-            V1["v1: HybridTransport\nWS 读 + POST 写"]
-            V2["v2: SSE + CCRClient\nSSETransport 读\nPOST /worker/* 写"]
-        end
-
-        POLL --> HB["heartbeatWork()"]
-        HB --> SERVER
-    end
-
-    SERVER -->|"WorkResponse (JSON)"| POLL
-    CHILD -->|"NDJSON stdout"| V1
-    CHILD -->|"NDJSON stdout"| V2
-    V1 -->|WebSocket| SERVER
-    V2 -->|"SSE + HTTP POST"| SERVER
-```
+<p align="center">
+  <img src="../assets/13-bridge-system.svg" width="550">
+</p>
 
 ---
 

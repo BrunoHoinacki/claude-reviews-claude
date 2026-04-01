@@ -1,4 +1,4 @@
-# 00 — The Complete Architecture of Claude Code
+﻿# 00 — The Complete Architecture of Claude Code
 
 > 🌐 **Language**: English | [中文版 →](zh-CN/00-overview.md)
 
@@ -119,47 +119,7 @@ User Input → CLI (cli.tsx) → QueryEngine.query() → System Prompt Assembly
 
 Not everyone should read these episodes in numerical order. Here are six paths optimized for different goals:
 
-```mermaid
-graph LR
-    subgraph "🟢 Path A: Core Loop (Start Here)"
-        A1[00 Overview] --> A2[12 Startup]
-        A2 --> A3[01 Query Engine]
-        A3 --> A4[02 Tool System]
-    end
-
-    subgraph "🔵 Path B: Security & Resources"
-        B1[06 Bash Engine] --> B2[07 Permission]
-        B2 --> B3[10 Context Assembly]
-        B3 --> B4[11 Compact System]
-    end
-
-    subgraph "🟣 Path C: Collaboration & Extension"
-        C1[03 Coordinator] --> C2[08 Agent Swarms]
-        C2 --> C3[04 Plugin System]
-        C3 --> C4[05 Hook System]
-    end
-
-    subgraph "🟠 Path D: Infrastructure"
-        D1[15 Services & API] --> D2[16 Infrastructure]
-        D2 --> D3[09 Session]
-    end
-
-    subgraph "🔴 Path E: Experience Layer"
-        E1[13 Bridge System] --> E2[14 UI & State]
-    end
-
-    subgraph "🟡 Path F: The Dark Side"
-        F1[17 Telemetry & Ops]
-    end
-
-    A4 --> B1
-    A4 --> C1
-    B4 --> D1
-    C4 --> D1
-    D3 --> E1
-    D3 -.-> F1
-    E2 -.-> F1
-```
+![00 overview](assets/00-overview.svg)
 
 | Path | Name | Best For | Episodes |
 |------|------|----------|----------|

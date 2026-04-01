@@ -8,35 +8,9 @@
 
 ## 架构概览
 
-```mermaid
-graph TB
-    subgraph Write["✍️ 写入路径"]
-        QE["QueryEngine<br/>工具循环消息"] --> RT["recordTranscript()"]
-        RT --> IC["insertMessageChain()"]
-        IC --> AE["appendEntry()"]
-        AE --> WQ["写入队列<br/>100ms 合并"]
-        WQ --> FS["JSONL 文件<br/>~/.claude/projects/{hash}/{sid}.jsonl"]
-        AE --> RI["persistToRemote()<br/>Session Ingress / CCR v2"]
-    end
-
-    subgraph Read["📖 读取路径"]
-        CLI["--resume / --continue"] --> LCR["loadConversation<br/>ForResume()"]
-        LCR --> LTF["loadTranscriptFile()"]
-        LTF --> PARSE["解析 JSONL<br/>→ Map<UUID, Msg>"]
-        PARSE --> CHAIN["buildConversation<br/>Chain()"]
-        CHAIN --> DESER["deserializeMessages()<br/>过滤孤立消息"]
-        DESER --> PROC["processResumed<br/>Conversation()"]
-    end
-
-    subgraph Lite["⚡ 轻量路径（--resume 选择器）"]
-        LIST["listSessionsImpl()"] --> STAT["stat 扫描<br/>1000 文件 → 排序"]
-        STAT --> HEAD["readHeadAndTail()<br/>64KB 头 + 尾"]
-        HEAD --> EXTRACT["extractFirstPrompt<br/>extractJsonStringField"]
-    end
-
-    FS -.-> LTF
-    FS -.-> HEAD
-```
+<p align="center">
+  <img src="../assets/09-session-persistence.svg" width="500">
+</p>
 
 ---
 

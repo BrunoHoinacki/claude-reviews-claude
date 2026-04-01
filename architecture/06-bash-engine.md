@@ -8,48 +8,7 @@
 
 ## Architecture Overview
 
-```mermaid
-graph TB
-    subgraph BashTool["🔧 BashTool (1144 lines)"]
-        VALIDATE["validateInput()<br/>Block sleep > 2s, schema check"]
-        PERM["checkPermissions()<br/>bashToolHasPermission()"]
-        CALL["call() → runShellCommand()"]
-    end
-
-    subgraph Security["🛡️ Security Layer"]
-        AST["ast.ts — parseForSecurity()<br/>Tree-sitter bash AST parsing"]
-        RO["readOnlyValidation.ts (70KB)<br/>Is this command read-only?"]
-        SED["sedEditParser.ts<br/>sed -i → simulated file edit"]
-        PATH["pathValidation.ts (45KB)<br/>Path traversal checks"]
-        BSEC["bashSecurity.ts (105KB)<br/>Command classification"]
-    end
-
-    subgraph Shell["⚡ Shell Execution"]
-        EXEC["Shell.exec()<br/>Find shell, build command,<br/>spawn child process"]
-        WRAP["ShellCommand (wrapSpawn)<br/>timeout, abort, background"]
-        TASK["TaskOutput<br/>File-mode I/O, progress polling"]
-    end
-
-    subgraph Sandbox["🏗️ OS Sandbox"]
-        SBM["SandboxManager<br/>(sandbox-adapter.ts)"]
-        MAC["macOS: seatbelt<br/>(sandbox-exec)"]
-        LNX["Linux: bubblewrap<br/>(bwrap + seccomp)"]
-    end
-
-    subgraph Provider["🐚 Shell Provider"]
-        BASH_P["bashProvider.ts<br/>snapshot, extglob, eval"]
-        PS_P["powershellProvider.ts<br/>EncodedCommand"]
-    end
-
-    VALIDATE --> PERM
-    PERM --> CALL
-    CALL --> EXEC
-    EXEC --> Provider
-    EXEC --> Sandbox
-    EXEC --> WRAP
-    WRAP --> TASK
-    PERM -.-> Security
-```
+![06 bash engine 1](assets/06-bash-engine-1.svg)
 
 ---
 
@@ -224,15 +183,9 @@ The NFC normalization handles macOS APFS which stores paths as NFD — without i
 
 `ShellCommand.ts` wraps each `child_process.spawn()` with lifecycle management:
 
-```mermaid
-stateDiagram-v2
-    [*] --> Running: spawn()
-    Running --> Completed: exit event
-    Running --> Killed: abort / timeout (no auto-bg)
-    Running --> Backgrounded: Ctrl+B / timeout (auto-bg) / 15s budget
-    Backgrounded --> Completed: exit event
-    Backgrounded --> Killed: size watchdog (>768MB incident!)
-```
+<p align="center">
+  <img src="assets/06-bash-engine-2.svg" width="580">
+</p>
 
 ### The Size Watchdog
 
@@ -371,47 +324,7 @@ Post-command, `scrubBareGitRepoFiles()` removes any planted files before unsandb
 
 ## 7. Complete Execution Flow
 
-```mermaid
-sequenceDiagram
-    participant Model as LLM
-    participant BT as BashTool
-    participant Sec as Security Layer
-    participant Shell as Shell.exec()
-    participant SB as SandboxManager
-    participant OS as Child Process
-
-    Model->>BT: call({ command: "npm test" })
-    BT->>BT: validateInput() — block sleep patterns
-    BT->>Sec: checkPermissions()
-    Sec->>Sec: parseForSecurity() — AST analysis
-    Sec->>Sec: checkReadOnlyConstraints()
-    Sec-->>BT: PermissionResult
-
-    BT->>Shell: exec(command, signal, 'bash', opts)
-    Shell->>Shell: findSuitableShell() → /bin/zsh
-    Shell->>Shell: provider.buildExecCommand()
-    Note right of Shell: source snapshot && eval 'npm test' && pwd -P >| /tmp/cwd
-
-    alt Sandbox Enabled
-        Shell->>SB: wrapWithSandbox(command, shell)
-        SB-->>Shell: Wrapped command with seatbelt/bwrap
-    end
-
-    Shell->>OS: spawn(shell, ['-c', command])
-    
-    loop Progress Polling (every 1s)
-        OS-->>Shell: stdout/stderr → file fd
-        Shell-->>BT: yield { progress, elapsed }
-    end
-
-    OS-->>Shell: exit(0)
-    Shell->>Shell: readFileSync(cwdFile) → update CWD
-    Shell-->>BT: ExecResult
-
-    BT->>BT: interpretCommandResult()
-    BT->>BT: extractClaudeCodeHints() — zero-token side channel
-    BT-->>Model: { stdout, stderr, interrupted }
-```
+![06 bash engine 3](assets/06-bash-engine-3.svg)
 
 ---
 

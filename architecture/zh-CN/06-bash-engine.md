@@ -8,48 +8,7 @@
 
 ## 架构概览
 
-```mermaid
-graph TB
-    subgraph BashTool["🔧 BashTool (1144 行)"]
-        VALIDATE["validateInput()<br/>拦截 sleep > 2s, 模式校验"]
-        PERM["checkPermissions()<br/>bashToolHasPermission()"]
-        CALL["call() → runShellCommand()"]
-    end
-
-    subgraph Security["🛡️ 安全层"]
-        AST["ast.ts — parseForSecurity()<br/>Tree-sitter bash AST 解析"]
-        RO["readOnlyValidation.ts (70KB)<br/>该命令是否只读？"]
-        SED["sedEditParser.ts<br/>sed -i → 模拟文件编辑"]
-        PATH["pathValidation.ts (45KB)<br/>路径穿越检测"]
-        BSEC["bashSecurity.ts (105KB)<br/>命令安全分类"]
-    end
-
-    subgraph Shell["⚡ Shell 执行层"]
-        EXEC["Shell.exec()<br/>查找 Shell、构建命令、<br/>生成子进程"]
-        WRAP["ShellCommand (wrapSpawn)<br/>超时、中止、后台化"]
-        TASK["TaskOutput<br/>文件直写 I/O、轮询进度"]
-    end
-
-    subgraph Sandbox["🏗️ 操作系统沙箱"]
-        SBM["SandboxManager<br/>(sandbox-adapter.ts)"]
-        MAC["macOS: seatbelt<br/>(sandbox-exec)"]
-        LNX["Linux: bubblewrap<br/>(bwrap + seccomp)"]
-    end
-
-    subgraph Provider["🐚 Shell 提供者"]
-        BASH_P["bashProvider.ts<br/>快照、extglob、eval"]
-        PS_P["powershellProvider.ts<br/>EncodedCommand"]
-    end
-
-    VALIDATE --> PERM
-    PERM --> CALL
-    CALL --> EXEC
-    EXEC --> Provider
-    EXEC --> Sandbox
-    EXEC --> WRAP
-    WRAP --> TASK
-    PERM -.-> Security
-```
+![06 bash engine 1](../assets/06-bash-engine-1.svg)
 
 ---
 
@@ -155,15 +114,9 @@ Claude Code 对支持哪些 Shell 有明确立场：
 
 ## 4. ShellCommand：进程包装器
 
-```mermaid
-stateDiagram-v2
-    [*] --> Running: spawn()
-    Running --> Completed: exit 事件
-    Running --> Killed: abort / 超时(无自动后台)
-    Running --> Backgrounded: Ctrl+B / 超时(自动后台) / 15s预算
-    Backgrounded --> Completed: exit 事件
-    Backgrounded --> Killed: 大小看门狗 (> 768MB 事故!)
-```
+<p align="center">
+  <img src="../assets/06-bash-engine-2.svg" width="580">
+</p>
 
 ### 大小看门狗
 
@@ -229,47 +182,7 @@ source /tmp/snapshot.sh 2>/dev/null || true
 
 ## 7. 完整执行流程
 
-```mermaid
-sequenceDiagram
-    participant 模型 as LLM
-    participant BT as BashTool
-    participant 安全 as 安全层
-    participant Shell as Shell.exec()
-    participant SB as 沙箱管理器
-    participant OS as 子进程
-
-    模型->>BT: call({ command: "npm test" })
-    BT->>BT: validateInput() — 拦截 sleep 模式
-    BT->>安全: checkPermissions()
-    安全->>安全: parseForSecurity() — AST 分析
-    安全->>安全: checkReadOnlyConstraints()
-    安全-->>BT: 权限结果
-
-    BT->>Shell: exec(command, signal, 'bash', opts)
-    Shell->>Shell: findSuitableShell() → /bin/zsh
-    Shell->>Shell: provider.buildExecCommand()
-    Note right of Shell: source 快照 && eval 'npm test' && pwd -P >| /tmp/cwd
-
-    alt 沙箱已开启
-        Shell->>SB: wrapWithSandbox(command, shell)
-        SB-->>Shell: 用 seatbelt/bwrap 包装的命令
-    end
-
-    Shell->>OS: spawn(shell, ['-c', command])
-    
-    loop 进度轮询 (每 1 秒)
-        OS-->>Shell: stdout/stderr → 文件 fd
-        Shell-->>BT: yield { 进度, 已用时间 }
-    end
-
-    OS-->>Shell: exit(0)
-    Shell->>Shell: readFileSync(cwdFile) → 更新 CWD
-    Shell-->>BT: 执行结果
-
-    BT->>BT: interpretCommandResult()
-    BT->>BT: extractClaudeCodeHints() — 零 Token 侧信道
-    BT-->>模型: { stdout, stderr, interrupted }
-```
+![06 bash engine 3](../assets/06-bash-engine-3.svg)
 
 ---
 

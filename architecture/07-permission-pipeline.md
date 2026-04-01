@@ -1,4 +1,4 @@
-# 07 — Permission Pipeline: Defense-in-Depth from Rules to Kernel
+﻿# 07 — Permission Pipeline: Defense-in-Depth from Rules to Kernel
 
 > **Scope**: `utils/permissions/` (24 files, ~320KB), `utils/settings/` (17 files, ~135KB), `utils/sandbox/` (2 files, ~37KB)
 >
@@ -8,47 +8,7 @@
 
 ## Architecture Overview
 
-```mermaid
-graph TB
-    subgraph Pipeline["🔐 Permission Pipeline (1487 lines)"]
-        S1A["1a. Deny rules<br/>(tool-level)"]
-        S1B["1b. Ask rules<br/>(tool-level)"]
-        S1C["1c. tool.checkPermissions()<br/>(content-specific)"]
-        S1D["1d. Tool denies"]
-        S1E["1e. requiresUserInteraction()"]
-        S1F["1f. Content-specific ask rules"]
-        S1G["1g. Safety checks<br/>(.git, .claude, shell configs)"]
-        S2A["2a. bypassPermissions mode"]
-        S2B["2b. alwaysAllow rules<br/>(tool-level)"]
-        S3["3. passthrough → ask"]
-    end
-
-    subgraph PostPipeline["⚡ Post-Pipeline Transforms"]
-        DONT["dontAsk mode<br/>ask → deny"]
-        AUTO["Auto mode (YOLO)<br/>AI classifier decides"]
-        HEADLESS["Headless agents<br/>hooks → auto-deny"]
-    end
-
-    subgraph Classifier["🤖 YOLO Classifier (1496 lines)"]
-        FAST["acceptEdits fast-path"]
-        SAFE["Safe tool allowlist"]
-        XML["2-Stage XML Classifier<br/>Stage 1: fast <block>yes/no<br/>Stage 2: chain-of-thought"]
-    end
-
-    subgraph Sandbox["🏗️ OS Sandbox"]
-        SEAT["macOS: seatbelt"]
-        BWRAP["Linux: bubblewrap + seccomp"]
-    end
-
-    S1A --> S1B --> S1C --> S1D --> S1E --> S1F --> S1G
-    S1G --> S2A --> S2B --> S3
-    S3 --> PostPipeline
-    AUTO --> Classifier
-    FAST --> |"allowed"|AUTO
-    SAFE --> |"allowed"|AUTO
-    XML --> |"block/allow"|AUTO
-    S2A --> |"sandboxed"|Sandbox
-```
+![07 permission pipeline 1](assets/07-permission-pipeline-1.svg)
 
 ---
 
@@ -137,20 +97,7 @@ If nothing decided, the default is to ask the user.
 
 Six modes control how `ask` decisions are resolved:
 
-```mermaid
-graph LR
-    DEFAULT["Default<br/>User prompted for ask"]
-    PLAN["Plan Mode ⏸<br/>Read-only, user reviews"]
-    ACCEPT["Accept Edits ⏵⏵<br/>Auto-allow file edits"]
-    BYPASS["Bypass ⏵⏵<br/>Auto-allow everything<br/>(except safety checks)"]
-    DONTASK["Don't Ask ⏵⏵<br/>ask → deny (silent)"]
-    AUTO["Auto Mode ⏵⏵<br/>AI classifier decides"]
-
-    DEFAULT ---|"Shift+Tab"| PLAN
-    DEFAULT ---|"Shift+Tab"| ACCEPT
-    DEFAULT ---|"Shift+Tab"| BYPASS
-    DEFAULT ---|"--permission-mode"| AUTO
-```
+![07 permission pipeline 2](assets/07-permission-pipeline-2.svg)
 
 ### Mode Behavior Matrix
 
@@ -248,23 +195,7 @@ Allowlisted tools skip the classifier entirely.
 
 The classifier uses a separate LLM API call (`sideQuery`) with a specialized system prompt:
 
-```mermaid
-sequenceDiagram
-    participant P as Permission Pipeline
-    participant S1 as Stage 1 (Fast)
-    participant S2 as Stage 2 (Thinking)
-
-    P->>S1: Transcript + Action + XML suffix
-    Note right of S1: max_tokens=64<br/>stop_sequences=[</block>]
-    S1-->>P: <block>no</block>
-
-    Note over P: If S1 says "allow" → done
-
-    P->>S1: <block>yes → escalate
-    P->>S2: Same transcript + thinking suffix
-    Note right of S2: max_tokens=4096<br/><thinking>...</thinking><block>
-    S2-->>P: Final block/allow decision
-```
+![07 permission pipeline 3](assets/07-permission-pipeline-3.svg)
 
 **Stage 1 (Fast)**: Nudges an immediate `<block>yes/no` decision with 64 max tokens. If allowed → done.
 
@@ -380,52 +311,7 @@ When `autoAllowBashIfSandboxed` is enabled:
 
 ## 8. Complete Decision Flow
 
-```mermaid
-flowchart TD
-    START["Tool Use Request"] --> DENY_RULE{"1a. Deny rule<br/>for tool?"}
-    DENY_RULE -->|Yes| DENIED["❌ DENY"]
-    DENY_RULE -->|No| ASK_RULE{"1b. Ask rule<br/>for tool?"}
-
-    ASK_RULE -->|Yes| SANDBOX_CHECK{"Sandbox can<br/>auto-allow?"}
-    SANDBOX_CHECK -->|No| ASK_RETURN["→ ASK"]
-    SANDBOX_CHECK -->|Yes| TOOL_CHECK
-    ASK_RULE -->|No| TOOL_CHECK
-
-    TOOL_CHECK["1c. tool.checkPermissions()"] --> TOOL_DENY{"1d. Tool<br/>denied?"}
-    TOOL_DENY -->|Yes| DENIED
-    TOOL_DENY -->|No| INTERACTION{"1e. Requires<br/>interaction?"}
-
-    INTERACTION -->|Yes + ask| ASK_RETURN
-    INTERACTION -->|No| CONTENT_ASK{"1f. Content-specific<br/>ask rule?"}
-
-    CONTENT_ASK -->|Yes| ASK_RETURN
-    CONTENT_ASK -->|No| SAFETY{"1g. Safety check<br/>(.git, .claude)?"}
-
-    SAFETY -->|Yes| ASK_RETURN
-    SAFETY -->|No| MODE{"2a. Bypass<br/>mode?"}
-
-    MODE -->|Yes| ALLOWED["✅ ALLOW"]
-    MODE -->|No| ALLOW_RULE{"2b. Always-allow<br/>rule?"}
-
-    ALLOW_RULE -->|Yes| ALLOWED
-    ALLOW_RULE -->|No| PASSTHROUGH["3. → ASK (default)"]
-
-    PASSTHROUGH --> MODE_TRANSFORM{"Permission Mode?"}
-    MODE_TRANSFORM -->|dontAsk| DENIED
-    MODE_TRANSFORM -->|auto| CLASSIFIER["YOLO Classifier"]
-    MODE_TRANSFORM -->|default| USER_PROMPT["👤 Prompt User"]
-
-    CLASSIFIER --> FAST_PATH{"acceptEdits<br/>fast-path?"}
-    FAST_PATH -->|Yes| ALLOWED
-    FAST_PATH -->|No| SAFE_TOOL{"Safe tool<br/>allowlist?"}
-    SAFE_TOOL -->|Yes| ALLOWED
-    SAFE_TOOL -->|No| XML_CLASSIFY["2-Stage XML<br/>Classifier"]
-    XML_CLASSIFY -->|Allow| ALLOWED
-    XML_CLASSIFY -->|Block| DENIAL_LIMIT{"Denial limit<br/>exceeded?"}
-    DENIAL_LIMIT -->|No| DENIED
-    DENIAL_LIMIT -->|Yes: interactive| USER_PROMPT
-    DENIAL_LIMIT -->|Yes: headless| ABORT["💀 ABORT"]
-```
+![07 permission pipeline 4](assets/07-permission-pipeline-4.svg)
 
 ---
 

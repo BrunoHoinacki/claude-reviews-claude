@@ -6,47 +6,9 @@
 
 ## 架构概览
 
-```mermaid
-graph TD
-    subgraph "系统提示词（缓存）"
-        SP["getSystemPrompt()<br/>prompts.ts"] --> INTRO["身份 + 规则"]
-        SP --> TOOLS_SEC["工具使用指南"]
-        SP --> STYLE["语气与风格"]
-        SP --> BOUNDARY["── 动态边界 ──"]
-        SP --> MEMORY["CLAUDE.md 记忆"]
-        SP --> ENV["环境信息"]
-        SP --> LANG["语言偏好"]
-        SP --> MCP_I["MCP 指令"]
-    end
-
-    subgraph "用户上下文（记忆化）"
-        UC["getUserContext()<br/>context.ts"] --> CMD["getClaudeMds()"]
-        CMD --> WALK["目录遍历<br/>CWD → 根目录"]
-        CMD --> RULES["规则处理<br/>.claude/rules/*.md"]
-    end
-
-    subgraph "系统上下文（记忆化）"
-        SC["getSystemContext()<br/>context.ts"] --> GIT["getGitStatus()"]
-        GIT --> BRANCH["分支 + 状态 + 日志"]
-    end
-
-    subgraph "每轮附件"
-        ATT["getAttachments()<br/>attachments.ts"] --> FILES["@提及的文件"]
-        ATT --> IDE["IDE 选中内容"]
-        ATT --> NESTED["嵌套记忆"]
-        ATT --> DIAG["诊断信息"]
-        ATT --> HOOKS["钩子响应"]
-        ATT --> TASKS["任务/计划提醒"]
-        ATT --> SKILLS["技能发现"]
-        ATT --> MAIL["队友邮箱"]
-    end
-
-    SP --> QE["QueryEngine.ask()"]
-    UC --> QE
-    SC --> QE
-    ATT --> QE
-    QE --> API["Anthropic API 调用"]
-```
+<p align="center">
+  <img src="../assets/10-context-assembly.svg" width="550">
+</p>
 
 ---
 
