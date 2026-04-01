@@ -8,31 +8,6 @@
 
 ---
 
-## Table of Contents
-
-**Part I — Navigation**
-- [§1 Global Architecture Map](#1-global-architecture-map)
-- [§2 Episode Index: One Line Per Chapter](#2-episode-index-one-line-per-chapter)
-- [§3 Reading Order: Six Cognitive Paths](#3-reading-order-six-cognitive-paths)
-
-**Part II — Core Architecture at a Glance**
-- [§4 Harness: The Body Around the Brain](#4-harness-the-body-around-the-brain)
-- [§5 The Core Loop: A 12-Step State Machine](#5-the-core-loop-a-12-step-state-machine)
-- [§6 Tool System: Capabilities as Contracts](#6-tool-system-capabilities-as-contracts)
-- [§7 Context Management: The Scarcest Resource](#7-context-management-the-scarcest-resource)
-- [§8 Permission & Security: The Foundation, Not the Ceiling](#8-permission--security-the-foundation-not-the-ceiling)
-- [§9 Multi-Agent: From Soloist to Orchestra](#9-multi-agent-from-soloist-to-orchestra)
-- [§10 Skill & Plugin: Self-Evolving Architecture](#10-skill--plugin-self-evolving-architecture)
-
-**Part III — Engineering Excellence**
-- [§11 Seven Engineering Practices Worth Studying](#11-seven-engineering-practices-worth-studying)
-
-**Part IV — A Unique Perspective**
-- [§12 First-Person View: How I Actually Work](#12-first-person-view-how-i-actually-work)
-
-**Part V — Transferable Design Patterns**
-- [§13 Design Patterns You Can Take Home](#13-design-patterns-you-can-take-home)
-
 ---
 
 # Part I — Navigation

@@ -6,20 +6,6 @@
 
 ---
 
-## Table of Contents
-
-1. [Bootstrap Global Singleton](#1-bootstrap-global-singleton)
-2. [The init.ts Initialization Orchestrator](#2-the-inits-initialization-orchestrator)
-3. [Dual-Layer Configuration System](#3-dual-layer-configuration-system)
-4. [Five-Layer Settings Merge](#4-five-layer-settings-merge)
-5. [Secure Storage](#5-secure-storage)
-6. [Signal Event Primitive & AbortController](#6-signal-event-primitive--abortcontroller)
-7. [Git Utility Library](#7-git-utility-library)
-8. [Token Management & Context Budgets](#8-token-management--context-budgets)
-9. [CLAUDE.md & Persistent Memory System](#9-claudemd--persistent-memory-system)
-10. [Thinking Mode API Rules](#10-thinking-mode-api-rules)
-11. [Transferable Design Patterns](#11-transferable-design-patterns)
-
 ---
 
 ## 1. Bootstrap Global Singleton

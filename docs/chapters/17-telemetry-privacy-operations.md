@@ -8,18 +8,6 @@
 
 ---
 
-## Table of Contents
-
-1. [Dual-Channel Telemetry Pipeline](#1-dual-channel-telemetry-pipeline)
-2. [The Data Harvest: What Gets Collected](#2-the-data-harvest-what-gets-collected)
-3. [The Opt-Out Dilemma](#3-the-opt-out-dilemma)
-4. [Model Codename System](#4-model-codename-system)
-5. [Feature Flag Obfuscation](#5-feature-flag-obfuscation)
-6. [Undercover Mode: Concealing AI Authorship](#6-undercover-mode-concealing-ai-authorship)
-7. [Remote Control & Emergency Switches](#7-remote-control--emergency-switches)
-8. [The Two-Tier User Experience](#8-the-two-tier-user-experience)
-9. [Future Roadmap: Evidence from Source](#9-future-roadmap-evidence-from-source)
-
 ---
 
 ## 1. Dual-Channel Telemetry Pipeline
